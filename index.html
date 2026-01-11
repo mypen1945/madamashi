@@ -1,355 +1,14 @@
-﻿<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Madamashi</title>
-    <style>
-        /* --- スタイル定義（変更なし） --- */
-        :root {
-            --bg-color: #ffffff;
-            --border-color: #eff3f4;
-            --text-main: #0f1419;
-            --text-secondary: #536471;
-            --accent-color: #1d9bf0;
-            --hover-bg: #f7f9f9;
-            --media-radius: 16px;
-            --homework-red: #d93025;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 600px;
-            border-left: 1px solid var(--border-color);
-            border-right: 1px solid var(--border-color);
-            min-height: 100vh;
-            padding-bottom: 50px;
-        }
-
-        .header {
-            position: sticky;
-            top: 0;
-            background-color: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            z-index: 100;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .search-container {
-            padding: 12px 16px;
-            background-color: var(--bg-color);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 10px 16px;
-            background-color: #eff3f4;
-            border: 1px solid transparent;
-            border-radius: 9999px;
-            font-size: 15px;
-            outline: none;
-            box-sizing: border-box;
-            transition: 0.2s;
-        }
-
-            .search-input:focus {
-                background-color: var(--bg-color);
-                border-color: var(--accent-color);
-                box-shadow: 0 0 0 1px var(--accent-color);
-            }
-
-        .filter-row {
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .filter-btn {
-            background-color: white;
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-            padding: 6px 16px;
-            border-radius: 9999px;
-            font-size: 13px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-            .filter-btn.active {
-                background-color: #fce8e6;
-                color: var(--homework-red);
-                border-color: #fad2cf;
-            }
-
-        .auth-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 80vh;
-            text-align: center;
-        }
-
-        button.login-btn {
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 9999px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 18px;
-            transition: 0.2s;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-            button.login-btn:hover {
-                background-color: #1a8cd8;
-                transform: translateY(-1px);
-            }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-secondary);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-        }
-
-        .spinner {
-            border: 3px solid var(--border-color);
-            border-top: 3px solid var(--accent-color);
-            border-radius: 50%;
-            width: 26px;
-            height: 26px;
-            animation: spin 0.8s linear infinite;
-            margin-bottom: 12px;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .tweet {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            gap: 10px;
-            transition: background-color 0.2s;
-            cursor: pointer;
-        }
-
-            .tweet:hover {
-                background-color: var(--hover-bg);
-            }
-
-        .avatar-container {
-            flex-shrink: 0;
-        }
-
-        .avatar-img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            background-color: #ddd;
-            border: 1px solid rgba(0,0,0,0.04);
-        }
-
-        .avatar-fallback {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background-color: #8899a6;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .user-info {
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .user-header-row {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 15px;
-        }
-
-        .user-name {
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        .user-screenname {
-            display: block;
-            color: var(--text-secondary);
-            font-weight: 400;
-            font-size: 14px;
-            text-decoration: none;
-            white-space: normal;
-            word-break: break-all;
-            margin-top: 2px;
-        }
-
-            .user-screenname:hover {
-                text-decoration: underline;
-                color: var(--accent-color);
-            }
-
-        .tweet-time {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
-        .type-badge {
-            font-size: 11px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-left: auto;
-            font-weight: bold;
-        }
-
-        .badge-homework-not-submitted {
-            background-color: #fce8e6;
-            color: var(--homework-red);
-            border: 1px solid #fad2cf;
-        }
-
-        .badge-homework-submitted {
-            background-color: #e6f4ea;
-            color: #1e8e3e;
-            border: 1px solid #ceead6;
-        }
-
-        .tweet-text {
-            font-size: 15px;
-            line-height: 22px;
-            white-space: pre-wrap;
-            word-break: break-word;
-            color: var(--text-main);
-        }
-
-        .more-link {
-            color: var(--accent-color);
-            text-decoration: none;
-            cursor: pointer;
-            font-weight: 500;
-        }
-
-        .media-container {
-            margin-top: 12px;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-            background-color: #f8f9fa;
-            max-width: 300px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .tweet-media-img {
-            width: 100%;
-            height: auto;
-            cursor: pointer;
-            display: block;
-            object-fit: contain;
-        }
-
-        .attachments-list {
-            margin-top: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .attachment-link {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            text-decoration: none;
-            color: var(--text-main);
-            transition: background-color 0.2s;
-            font-size: 14px;
-        }
-
-            .attachment-link:hover {
-                background-color: #e9ecef;
-            }
-
-        .attachment-icon {
-            font-size: 20px;
-        }
-
-        .attachment-title {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            font-weight: 500;
-        }
-
-        .due-container {
-            margin-top: 8px;
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .due-text-normal {
-            color: var(--text-secondary);
-        }
-
-        .due-text-warning {
-            color: var(--homework-red);
-            font-weight: bold;
-        }
-
-        .due-submitted {
-            color: #1e8e3e;
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
+﻿<body>
 
     <div class="container">
         <div class="header">
             <div id="search_box" class="search-container" style="display: none;">
                 <input type="text" id="keyword_input" class="search-input" placeholder="投稿を検索" oninput="handleSearch()">
-                <div class="filter-row">
-                    <button id="homework_filter_btn" class="filter-btn" onclick="toggleHomeworkFilter()">課題のみ表示</button>
+                <div class="header-bottom-row">
+                    <span class="logout-btn" onclick="handleLogout()">ログアウト</span>
+                    <div class="filter-row">
+                        <button id="homework_filter_btn" class="filter-btn" onclick="toggleHomeworkFilter()">課題のみ表示</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -376,18 +35,23 @@
         ].join(' ');
 
         let tokenClient;
-        let accessToken = null;
+        let accessToken = localStorage.getItem('google_access_token');
         let allPosts = [];
         let globalUserMap = {};
         let isHomeworkOnly = false;
         let gisInited = false;
 
-        // Vercel上のサーバーレス関数へリクエストを送る共通関数
         async function fetchFromProxy(endpoint, params = {}) {
             const searchParams = new URLSearchParams({ endpoint, ...params });
+            // プロキシ先のURLが正しいか確認してください（例: /api/classroom）
             const response = await fetch(`/api/classroom?${searchParams.toString()}`, {
                 headers: { 'Authorization': `Bearer ${accessToken}` }
             });
+
+            if (response.status === 401) {
+                handleLogout();
+                throw new Error('Token expired');
+            }
             if (!response.ok) throw new Error('API request failed');
             return await response.json();
         }
@@ -399,20 +63,41 @@
                 callback: '',
             });
             gisInited = true;
+
+            // ページ読み込み時にトークンがあれば自動開始
+            if (accessToken) {
+                // GISの初期化直後に叩くとエラーになることがあるため、一瞬待機
+                setTimeout(startApp, 100);
+            }
         }
 
         function handleAuthClick() {
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) throw (resp);
-                accessToken = resp.access_token; // アクセストークンを取得
-                document.getElementById('auth_view').style.display = 'none';
-                document.getElementById('timeline').style.display = 'block';
-                document.getElementById('search_box').style.display = 'flex';
-                await loadTimeline();
-                setInterval(updateCountdowns, 1000);
+                accessToken = resp.access_token;
+                localStorage.setItem('google_access_token', accessToken);
+                startApp();
             };
             tokenClient.requestAccessToken({ prompt: '' });
         }
+
+        function handleLogout() {
+            localStorage.removeItem('google_access_token');
+            location.reload();
+        }
+
+        async function startApp() {
+            document.getElementById('auth_view').style.display = 'none';
+            document.getElementById('timeline').style.display = 'block';
+            document.getElementById('search_box').style.display = 'flex';
+            await loadTimeline();
+            // カウントダウン開始
+            if (!window.countdownTimer) {
+                window.countdownTimer = setInterval(updateCountdowns, 1000);
+            }
+        }
+
+        // --- 以下、描画ロジック ---
 
         function toggleHomeworkFilter() {
             isHomeworkOnly = !isHomeworkOnly;
@@ -442,13 +127,11 @@
             const timelineDiv = document.getElementById('timeline');
             timelineDiv.innerHTML = `<div class="loading"><div class="spinner"></div>投稿を取得中...</div>`;
             try {
-                // コース一覧を取得
                 const coursesData = await fetchFromProxy('courses', { courseStates: 'ACTIVE', pageSize: 30 });
                 const courses = coursesData.courses || [];
 
                 const promises = courses.map(async (course) => {
                     try {
-                        // お知らせと課題を取得
                         const [aRes, wRes] = await Promise.all([
                             fetchFromProxy(`courses/${course.id}/announcements`, { pageSize: 20 }),
                             fetchFromProxy(`courses/${course.id}/courseWork`, { pageSize: 20 })
@@ -488,7 +171,9 @@
                 renderPosts(allPosts, globalUserMap);
             } catch (err) {
                 console.error(err);
-                timelineDiv.innerHTML = `<div class="loading" style="color:red">読み込みエラーが発生しました</div>`;
+                if (err.message !== 'Token expired') {
+                    timelineDiv.innerHTML = `<div class="loading" style="color:red">読み込みエラーが発生しました。再読み込みしてください。</div>`;
+                }
             }
         }
 
@@ -515,6 +200,7 @@
                 const avatarHtml = photoUrl ? `<img src="${photoUrl}" class="avatar-img">` : `<div class="avatar-fallback">${authorName[0]}</div>`;
                 const textHtml = formatTweetText(post, i);
                 const attachmentsHtml = renderAttachments(post.materials);
+
                 let badgeHtml = '';
                 if (post.type === '課題') {
                     const isSubmitted = post.submissionStatus === 'SUBMITTED';
@@ -522,31 +208,33 @@
                     const badgeClass = isSubmitted ? 'badge-homework-submitted' : 'badge-homework-not-submitted';
                     badgeHtml = `<span class="type-badge ${badgeClass}">${badgeText}</span>`;
                 }
+
                 let dueHtml = '';
                 if (post.type === '課題' && post.dueDate) {
                     dueHtml = `<div class="due-container" id="due-${i}" data-post-index="${allPosts.indexOf(post)}"></div>`;
                 } else if (post.type === '課題' && !post.dueDate) {
                     dueHtml = `<div class="due-container due-text-normal">期限なし</div>`;
                 }
+
                 const html = `
-                        <div class="tweet" onclick="window.open('${post.alternateLink}?authuser=0', '_blank')">
-                            <div class="avatar-container">${avatarHtml}</div>
-                            <div class="content">
-                                <div class="user-info">
-                                    <div class="user-header-row">
-                                        <span class="user-name">${escapeHtml(authorName)}</span>
-                                        <span class="tweet-time">· ${formatDate(new Date(post.creationTime))}</span>
-                                        ${badgeHtml}
+                            <div class="tweet" onclick="window.open('${post.alternateLink}?authuser=0', '_blank')">
+                                <div class="avatar-container">${avatarHtml}</div>
+                                <div class="content">
+                                    <div class="user-info">
+                                        <div class="user-header-row">
+                                            <span class="user-name">${escapeHtml(authorName)}</span>
+                                            <span class="tweet-time">· ${formatDate(new Date(post.creationTime))}</span>
+                                            ${badgeHtml}
+                                        </div>
+                                        <a href="${post.courseUrl}?authuser=0" target="_blank" class="user-screenname" onclick="event.stopPropagation()">
+                                            @${escapeHtml(post.courseName)}
+                                        </a>
                                     </div>
-                                    <a href="${post.courseUrl}?authuser=0" target="_blank" class="user-screenname" onclick="event.stopPropagation()">
-                                        @${escapeHtml(post.courseName)}
-                                    </a>
+                                    ${textHtml}
+                                    ${attachmentsHtml}
+                                    ${dueHtml}
                                 </div>
-                                ${textHtml}
-                                ${attachmentsHtml}
-                                ${dueHtml}
-                            </div>
-                        </div>`;
+                            </div>`;
                 timelineDiv.innerHTML += html;
             });
             updateCountdowns();
@@ -616,4 +304,3 @@
         function linkify(s) { return s.replace(/(https?:\/\/[^\s]+)/g, url => `<a href="${url}" target="_blank" style="color:var(--accent-color);text-decoration:none;" onclick="event.stopPropagation()">${url}</a>`); }
     </script>
 </body>
-</html>
