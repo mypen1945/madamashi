@@ -1,0 +1,619 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Madamashi</title>
+    <style>
+        /* --- スタイル定義（変更なし） --- */
+        :root {
+            --bg-color: #ffffff;
+            --border-color: #eff3f4;
+            --text-main: #0f1419;
+            --text-secondary: #536471;
+            --accent-color: #1d9bf0;
+            --hover-bg: #f7f9f9;
+            --media-radius: 16px;
+            --homework-red: #d93025;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            border-left: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            z-index: 100;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-container {
+            padding: 12px 16px;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 16px;
+            background-color: #eff3f4;
+            border: 1px solid transparent;
+            border-radius: 9999px;
+            font-size: 15px;
+            outline: none;
+            box-sizing: border-box;
+            transition: 0.2s;
+        }
+
+            .search-input:focus {
+                background-color: var(--bg-color);
+                border-color: var(--accent-color);
+                box-shadow: 0 0 0 1px var(--accent-color);
+            }
+
+        .filter-row {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .filter-btn {
+            background-color: white;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            padding: 6px 16px;
+            border-radius: 9999px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+            .filter-btn.active {
+                background-color: #fce8e6;
+                color: var(--homework-red);
+                border-color: #fad2cf;
+            }
+
+        .auth-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+            text-align: center;
+        }
+
+        button.login-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 9999px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 18px;
+            transition: 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+            button.login-btn:hover {
+                background-color: #1a8cd8;
+                transform: translateY(-1px);
+            }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .spinner {
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 12px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .tweet {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+
+            .tweet:hover {
+                background-color: var(--hover-bg);
+            }
+
+        .avatar-container {
+            flex-shrink: 0;
+        }
+
+        .avatar-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            background-color: #ddd;
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .avatar-fallback {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #8899a6;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-info {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .user-header-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 15px;
+        }
+
+        .user-name {
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .user-screenname {
+            display: block;
+            color: var(--text-secondary);
+            font-weight: 400;
+            font-size: 14px;
+            text-decoration: none;
+            white-space: normal;
+            word-break: break-all;
+            margin-top: 2px;
+        }
+
+            .user-screenname:hover {
+                text-decoration: underline;
+                color: var(--accent-color);
+            }
+
+        .tweet-time {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .type-badge {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: auto;
+            font-weight: bold;
+        }
+
+        .badge-homework-not-submitted {
+            background-color: #fce8e6;
+            color: var(--homework-red);
+            border: 1px solid #fad2cf;
+        }
+
+        .badge-homework-submitted {
+            background-color: #e6f4ea;
+            color: #1e8e3e;
+            border: 1px solid #ceead6;
+        }
+
+        .tweet-text {
+            font-size: 15px;
+            line-height: 22px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: var(--text-main);
+        }
+
+        .more-link {
+            color: var(--accent-color);
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .media-container {
+            margin-top: 12px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background-color: #f8f9fa;
+            max-width: 300px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .tweet-media-img {
+            width: 100%;
+            height: auto;
+            cursor: pointer;
+            display: block;
+            object-fit: contain;
+        }
+
+        .attachments-list {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .attachment-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-main);
+            transition: background-color 0.2s;
+            font-size: 14px;
+        }
+
+            .attachment-link:hover {
+                background-color: #e9ecef;
+            }
+
+        .attachment-icon {
+            font-size: 20px;
+        }
+
+        .attachment-title {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .due-container {
+            margin-top: 8px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .due-text-normal {
+            color: var(--text-secondary);
+        }
+
+        .due-text-warning {
+            color: var(--homework-red);
+            font-weight: bold;
+        }
+
+        .due-submitted {
+            color: #1e8e3e;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div id="search_box" class="search-container" style="display: none;">
+                <input type="text" id="keyword_input" class="search-input" placeholder="投稿を検索" oninput="handleSearch()">
+                <div class="filter-row">
+                    <button id="homework_filter_btn" class="filter-btn" onclick="toggleHomeworkFilter()">課題のみ表示</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="auth_view" class="auth-container">
+            <button class="login-btn" onclick="handleAuthClick()">Googleでログイン</button>
+        </div>
+        <div id="timeline" style="display: none;"></div>
+    </div>
+
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+
+    <script>
+        // --- 設定 ---
+        const CLIENT_ID = '509904198894-j2cmhttdj3ks7nvdnupasjliov7aj8a7.apps.googleusercontent.com';
+        const SCOPES = [
+            'https://www.googleapis.com/auth/classroom.courses.readonly',
+            'https://www.googleapis.com/auth/classroom.announcements.readonly',
+            'https://www.googleapis.com/auth/classroom.rosters.readonly',
+            'https://www.googleapis.com/auth/classroom.coursework.me.readonly',
+            'https://www.googleapis.com/auth/classroom.profile.photos',
+            'https://www.googleapis.com/auth/drive.metadata.readonly',
+            'https://www.googleapis.com/auth/drive.readonly'
+        ].join(' ');
+
+        let tokenClient;
+        let accessToken = null;
+        let allPosts = [];
+        let globalUserMap = {};
+        let isHomeworkOnly = false;
+        let gisInited = false;
+
+        // Vercel上のサーバーレス関数へリクエストを送る共通関数
+        async function fetchFromProxy(endpoint, params = {}) {
+            const searchParams = new URLSearchParams({ endpoint, ...params });
+            const response = await fetch(`/api/classroom?${searchParams.toString()}`, {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+            if (!response.ok) throw new Error('API request failed');
+            return await response.json();
+        }
+
+        function gisLoaded() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: '',
+            });
+            gisInited = true;
+        }
+
+        function handleAuthClick() {
+            tokenClient.callback = async (resp) => {
+                if (resp.error !== undefined) throw (resp);
+                accessToken = resp.access_token; // アクセストークンを取得
+                document.getElementById('auth_view').style.display = 'none';
+                document.getElementById('timeline').style.display = 'block';
+                document.getElementById('search_box').style.display = 'flex';
+                await loadTimeline();
+                setInterval(updateCountdowns, 1000);
+            };
+            tokenClient.requestAccessToken({ prompt: '' });
+        }
+
+        function toggleHomeworkFilter() {
+            isHomeworkOnly = !isHomeworkOnly;
+            const btn = document.getElementById('homework_filter_btn');
+            btn.classList.toggle('active', isHomeworkOnly);
+            handleSearch();
+        }
+
+        let searchTimer;
+        function handleSearch() {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                const keyword = document.getElementById('keyword_input').value.toLowerCase();
+                const filteredPosts = allPosts.filter(post => {
+                    if (isHomeworkOnly && post.type !== '課題') return false;
+                    const user = globalUserMap[post.creatorUserId];
+                    const authorName = (user?.name?.fullName || '').toLowerCase();
+                    const text = (post.text || '').toLowerCase();
+                    const courseName = (post.courseName || '').toLowerCase();
+                    return text.includes(keyword) || authorName.includes(keyword) || courseName.includes(keyword);
+                });
+                renderPosts(filteredPosts, globalUserMap);
+            }, 300);
+        }
+
+        async function loadTimeline() {
+            const timelineDiv = document.getElementById('timeline');
+            timelineDiv.innerHTML = `<div class="loading"><div class="spinner"></div>投稿を取得中...</div>`;
+            try {
+                // コース一覧を取得
+                const coursesData = await fetchFromProxy('courses', { courseStates: 'ACTIVE', pageSize: 30 });
+                const courses = coursesData.courses || [];
+
+                const promises = courses.map(async (course) => {
+                    try {
+                        // お知らせと課題を取得
+                        const [aRes, wRes] = await Promise.all([
+                            fetchFromProxy(`courses/${course.id}/announcements`, { pageSize: 20 }),
+                            fetchFromProxy(`courses/${course.id}/courseWork`, { pageSize: 20 })
+                        ]);
+
+                        const ann = (aRes.announcements || []).map(p => ({
+                            ...p, courseName: course.name, courseUrl: course.alternateLink, type: 'お知らせ', materials: p.materials || []
+                        }));
+
+                        const wrkPromises = (wRes.courseWork || []).map(async (p) => {
+                            let status = 'NOT_SUBMITTED';
+                            try {
+                                const subRes = await fetchFromProxy(`courses/${course.id}/courseWork/${p.id}/studentSubmissions`, { userId: 'me' });
+                                const submission = subRes.studentSubmissions?.[0];
+                                status = (submission?.state === 'TURNED_IN' || submission?.state === 'RETURNED') ? 'SUBMITTED' : 'NOT_SUBMITTED';
+                            } catch (e) { }
+
+                            let dueDate = null;
+                            if (p.dueDate) {
+                                dueDate = new Date(p.dueDate.year, p.dueDate.month - 1, p.dueDate.day);
+                                if (p.dueTime) dueDate.setHours(p.dueTime.hours || 0, p.dueTime.minutes || 0, 0);
+                                else dueDate.setHours(23, 59, 59);
+                            }
+                            return { ...p, text: p.description || p.title, courseName: course.name, courseUrl: course.alternateLink, type: '課題', materials: p.materials || [], submissionStatus: status, dueDate: dueDate };
+                        });
+                        const wrk = await Promise.all(wrkPromises);
+                        return ann.concat(wrk);
+                    } catch (e) { return []; }
+                });
+
+                const results = await Promise.all(promises);
+                allPosts = results.flat();
+                allPosts.sort((a, b) => new Date(b.creationTime) - new Date(a.creationTime));
+
+                const userIds = [...new Set(allPosts.map(p => p.creatorUserId))];
+                globalUserMap = await fetchUserProfiles(userIds);
+                renderPosts(allPosts, globalUserMap);
+            } catch (err) {
+                console.error(err);
+                timelineDiv.innerHTML = `<div class="loading" style="color:red">読み込みエラーが発生しました</div>`;
+            }
+        }
+
+        async function fetchUserProfiles(userIds) {
+            const userMap = {};
+            await Promise.all(userIds.map(async (id) => {
+                try {
+                    const res = await fetchFromProxy(`userProfiles/${id}`);
+                    userMap[id] = res;
+                } catch (e) {
+                    userMap[id] = { name: { fullName: 'User' }, photoUrl: null };
+                }
+            }));
+            return userMap;
+        }
+
+        function renderPosts(posts, userMap) {
+            const timelineDiv = document.getElementById('timeline');
+            timelineDiv.innerHTML = '';
+            posts.forEach((post, i) => {
+                const user = userMap[post.creatorUserId];
+                const authorName = user?.name?.fullName || '先生';
+                let photoUrl = user?.photoUrl ? (user.photoUrl.startsWith('http') ? user.photoUrl : 'https:' + user.photoUrl).replace('/s50/', '/s100/') : null;
+                const avatarHtml = photoUrl ? `<img src="${photoUrl}" class="avatar-img">` : `<div class="avatar-fallback">${authorName[0]}</div>`;
+                const textHtml = formatTweetText(post, i);
+                const attachmentsHtml = renderAttachments(post.materials);
+                let badgeHtml = '';
+                if (post.type === '課題') {
+                    const isSubmitted = post.submissionStatus === 'SUBMITTED';
+                    const badgeText = isSubmitted ? '提出済' : '未提出';
+                    const badgeClass = isSubmitted ? 'badge-homework-submitted' : 'badge-homework-not-submitted';
+                    badgeHtml = `<span class="type-badge ${badgeClass}">${badgeText}</span>`;
+                }
+                let dueHtml = '';
+                if (post.type === '課題' && post.dueDate) {
+                    dueHtml = `<div class="due-container" id="due-${i}" data-post-index="${allPosts.indexOf(post)}"></div>`;
+                } else if (post.type === '課題' && !post.dueDate) {
+                    dueHtml = `<div class="due-container due-text-normal">期限なし</div>`;
+                }
+                const html = `
+                        <div class="tweet" onclick="window.open('${post.alternateLink}?authuser=0', '_blank')">
+                            <div class="avatar-container">${avatarHtml}</div>
+                            <div class="content">
+                                <div class="user-info">
+                                    <div class="user-header-row">
+                                        <span class="user-name">${escapeHtml(authorName)}</span>
+                                        <span class="tweet-time">· ${formatDate(new Date(post.creationTime))}</span>
+                                        ${badgeHtml}
+                                    </div>
+                                    <a href="${post.courseUrl}?authuser=0" target="_blank" class="user-screenname" onclick="event.stopPropagation()">
+                                        @${escapeHtml(post.courseName)}
+                                    </a>
+                                </div>
+                                ${textHtml}
+                                ${attachmentsHtml}
+                                ${dueHtml}
+                            </div>
+                        </div>`;
+                timelineDiv.innerHTML += html;
+            });
+            updateCountdowns();
+        }
+
+        function updateCountdowns() {
+            const containers = document.querySelectorAll('.due-container[id^="due-"]');
+            containers.forEach(el => {
+                const postIndex = el.getAttribute('data-post-index');
+                const post = allPosts[postIndex];
+                if (!post || post.submissionStatus === 'SUBMITTED') {
+                    el.innerHTML = `<span class="due-submitted">提出済み</span>`;
+                    return;
+                }
+                const now = new Date();
+                const diff = post.dueDate - now;
+                const isOver = diff < 0;
+                const absDiff = Math.abs(diff);
+                const isUrgent = isOver || diff < (24 * 60 * 60 * 1000);
+                const colorClass = isUrgent ? 'due-text-warning' : 'due-text-normal';
+                let timeStr = "";
+                if (isOver) {
+                    const days = Math.floor(absDiff / (24 * 60 * 60 * 1000));
+                    timeStr = days >= 1 ? `期限切れ ${days}日` : `期限切れ ${Math.floor(absDiff / (60 * 1000))}分`;
+                } else {
+                    const d = Math.floor(diff / (24 * 60 * 60 * 1000));
+                    const h = Math.floor((diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+                    const m = Math.floor((diff % (60 * 60 * 1000)) / (60 * 1000));
+                    const s = Math.floor((diff % (60 * 1000)) / 1000);
+                    timeStr = `期限まで ${d > 0 ? d + "日" : ""}${h}時間${m}分${s}秒`;
+                }
+                el.className = `due-container ${colorClass}`;
+                el.innerText = timeStr;
+            });
+        }
+
+        function renderAttachments(materials) {
+            if (!materials || materials.length === 0) return '';
+            let imagesHtml = '';
+            let filesHtml = '';
+            materials.forEach(m => {
+                if (m.driveFile && m.driveFile.driveFile) {
+                    const file = m.driveFile.driveFile;
+                    const title = file.title.toLowerCase();
+                    const link = file.alternateLink;
+                    const thumbnailUrl = file.thumbnailUrl ? file.thumbnailUrl.replace(/\/s\d+.*$/, '/s400') : '';
+                    if (thumbnailUrl && (title.endsWith('.jpg') || title.endsWith('.jpeg') || title.endsWith('.png') || title.endsWith('.gif'))) {
+                        imagesHtml += `<div class="media-container"><img src="${thumbnailUrl}" class="tweet-media-img" onclick="window.open('${link}', '_blank');event.stopPropagation();"></div>`;
+                    } else if (title.endsWith('.pdf')) {
+                        filesHtml += `<a href="${link}" target="_blank" class="attachment-link" onclick="event.stopPropagation()"><span class="attachment-icon">📄</span><span class="attachment-title">${escapeHtml(file.title)}</span></a>`;
+                    }
+                }
+            });
+            return imagesHtml + (filesHtml ? `<div class="attachments-list">${filesHtml}</div>` : '');
+        }
+
+        function formatTweetText(post, i) {
+            const text = post.text || "";
+            const limit = 140;
+            const id = `t-${i}`;
+            if (text.length <= limit) return `<div class="tweet-text">${linkify(escapeHtml(text))}</div>`;
+            return `<div class="tweet-text" id="${id}-s">${linkify(escapeHtml(text.substring(0, limit)))}... <a href="#" class="more-link" onclick="showMore(event, '${id}')">さらに表示</a></div><div class="tweet-text" id="${id}-f" style="display:none;">${linkify(escapeHtml(text))}</div>`;
+        }
+        window.showMore = (e, id) => { e.preventDefault(); e.stopPropagation(); document.getElementById(`${id}-s`).style.display = 'none'; document.getElementById(`${id}-f`).style.display = 'block'; };
+        function formatDate(d) { const diff = (new Date() - d) / 1000; if (diff < 3600) return `${Math.floor(diff / 60)}分`; if (diff < 86400) return `${Math.floor(diff / 3600)}時間`; return `${d.getMonth() + 1}月${d.getDate()}日`; }
+        function escapeHtml(s) { return s.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": "&#039;" }[m])); }
+        function linkify(s) { return s.replace(/(https?:\/\/[^\s]+)/g, url => `<a href="${url}" target="_blank" style="color:var(--accent-color);text-decoration:none;" onclick="event.stopPropagation()">${url}</a>`); }
+    </script>
+</body>
+</html>
