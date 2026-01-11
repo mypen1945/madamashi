@@ -418,15 +418,24 @@
         async function fetchFromProxy(endpoint, params = {}) {
             const searchParams = new URLSearchParams({ endpoint, ...params });
             const response = await fetch(`/api/classroom?${searchParams.toString()}`, {
-                headers: { 'Authorization': `Bearer ${accessToken}` }
+                headers: {
+                    // ログイン時に取得した accessToken をヘッダーに入れる
+                    'Authorization': `Bearer ${accessToken}`
+                }
             });
 
             if (response.status === 401) {
+                // トークンの有効期限切れ。自動ログアウトして再ログインを促す
                 handleLogout();
                 throw new Error('Token expired');
             }
-            if (!response.ok) throw new Error('API request failed');
-            return await response.json();
+
+            const data = await response.json();
+            if (!response.ok) {
+                console.error('API Error:', data);
+                throw new Error(data.error?.message || 'API request failed');
+            }
+            return data;
         }
 
         function gisLoaded() {
