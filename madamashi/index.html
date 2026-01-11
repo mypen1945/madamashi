@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Madamashi</title>
     <style>
-        /* --- スタイル定義 --- */
+        /* --- スタイル定義（変更なし） --- */
         :root {
             --bg-color: #ffffff;
             --border-color: #eff3f4;
@@ -44,7 +44,6 @@
             border-bottom: 1px solid var(--border-color);
         }
 
-        /* --- 検索バー・フィルターのスタイル --- */
         .search-container {
             padding: 12px 16px;
             background-color: var(--bg-color);
@@ -94,7 +93,6 @@
                 border-color: #fad2cf;
             }
 
-        /* --- 修正ポイント：ログインボタン中央配置 --- */
         .auth-container {
             display: flex;
             align-items: center;
@@ -107,11 +105,11 @@
             background-color: var(--accent-color);
             color: white;
             border: none;
-            padding: 15px 30px; /* 少し大きくしました */
+            padding: 15px 30px;
             border-radius: 9999px;
             font-weight: bold;
             cursor: pointer;
-            font-size: 18px; /* 少し大きくしました */
+            font-size: 18px;
             transition: 0.2s;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
@@ -362,13 +360,11 @@
         <div id="timeline" style="display: none;"></div>
     </div>
 
-    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
     <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 
     <script>
-        const CLIENT_ID = 'ここにID';
-        const API_KEY = 'ここにキー';
-
+        // --- 設定 ---
+        const CLIENT_ID = '509904198894-j2cmhttdj3ks7nvdnupasjliov7aj8a7.apps.googleusercontent.com';
         const SCOPES = [
             'https://www.googleapis.com/auth/classroom.courses.readonly',
             'https://www.googleapis.com/auth/classroom.announcements.readonly',
@@ -380,24 +376,35 @@
         ].join(' ');
 
         let tokenClient;
-        let gapiInited = false;
-        let gisInited = false;
+        let accessToken = null;
         let allPosts = [];
         let globalUserMap = {};
-        let isHomeworkOnly = false; // フィルター状態
+        let isHomeworkOnly = false;
+        let gisInited = false;
 
-        function gapiLoaded() { gapi.load('client', initializeGapiClient); }
-        async function initializeGapiClient() {
-            await gapi.client.init({ apiKey: API_KEY, discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/classroom/v1/rest"], });
-            gapiInited = true;
+        // Vercel上のサーバーレス関数へリクエストを送る共通関数
+        async function fetchFromProxy(endpoint, params = {}) {
+            const searchParams = new URLSearchParams({ endpoint, ...params });
+            const response = await fetch(`/api/classroom?${searchParams.toString()}`, {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+            if (!response.ok) throw new Error('API request failed');
+            return await response.json();
         }
+
         function gisLoaded() {
-            tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: '', });
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: '',
+            });
             gisInited = true;
         }
+
         function handleAuthClick() {
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) throw (resp);
+                accessToken = resp.access_token; // アクセストークンを取得
                 document.getElementById('auth_view').style.display = 'none';
                 document.getElementById('timeline').style.display = 'block';
                 document.getElementById('search_box').style.display = 'flex';
@@ -435,23 +442,30 @@
             const timelineDiv = document.getElementById('timeline');
             timelineDiv.innerHTML = `<div class="loading"><div class="spinner"></div>投稿を取得中...</div>`;
             try {
-                const coursesResp = await gapi.client.classroom.courses.list({ courseStates: ['ACTIVE'], pageSize: 30 });
-                const courses = coursesResp.result.courses || [];
+                // コース一覧を取得
+                const coursesData = await fetchFromProxy('courses', { courseStates: 'ACTIVE', pageSize: 30 });
+                const courses = coursesData.courses || [];
+
                 const promises = courses.map(async (course) => {
                     try {
-                        const announceP = gapi.client.classroom.courses.announcements.list({ courseId: course.id, pageSize: 20 });
-                        const workP = gapi.client.classroom.courses.courseWork.list({ courseId: course.id, pageSize: 20 });
-                        const [aRes, wRes] = await Promise.all([announceP, workP]);
-                        const ann = (aRes.result.announcements || []).map(p => ({
+                        // お知らせと課題を取得
+                        const [aRes, wRes] = await Promise.all([
+                            fetchFromProxy(`courses/${course.id}/announcements`, { pageSize: 20 }),
+                            fetchFromProxy(`courses/${course.id}/courseWork`, { pageSize: 20 })
+                        ]);
+
+                        const ann = (aRes.announcements || []).map(p => ({
                             ...p, courseName: course.name, courseUrl: course.alternateLink, type: 'お知らせ', materials: p.materials || []
                         }));
-                        const wrkPromises = (wRes.result.courseWork || []).map(async (p) => {
+
+                        const wrkPromises = (wRes.courseWork || []).map(async (p) => {
                             let status = 'NOT_SUBMITTED';
                             try {
-                                const subRes = await gapi.client.classroom.courses.courseWork.studentSubmissions.list({ courseId: course.id, courseWorkId: p.id, userId: 'me' });
-                                const submission = subRes.result.studentSubmissions?.[0];
+                                const subRes = await fetchFromProxy(`courses/${course.id}/courseWork/${p.id}/studentSubmissions`, { userId: 'me' });
+                                const submission = subRes.studentSubmissions?.[0];
                                 status = (submission?.state === 'TURNED_IN' || submission?.state === 'RETURNED') ? 'SUBMITTED' : 'NOT_SUBMITTED';
                             } catch (e) { }
+
                             let dueDate = null;
                             if (p.dueDate) {
                                 dueDate = new Date(p.dueDate.year, p.dueDate.month - 1, p.dueDate.day);
@@ -464,13 +478,16 @@
                         return ann.concat(wrk);
                     } catch (e) { return []; }
                 });
+
                 const results = await Promise.all(promises);
                 allPosts = results.flat();
                 allPosts.sort((a, b) => new Date(b.creationTime) - new Date(a.creationTime));
+
                 const userIds = [...new Set(allPosts.map(p => p.creatorUserId))];
                 globalUserMap = await fetchUserProfiles(userIds);
                 renderPosts(allPosts, globalUserMap);
             } catch (err) {
+                console.error(err);
                 timelineDiv.innerHTML = `<div class="loading" style="color:red">読み込みエラーが発生しました</div>`;
             }
         }
@@ -478,8 +495,12 @@
         async function fetchUserProfiles(userIds) {
             const userMap = {};
             await Promise.all(userIds.map(async (id) => {
-                try { const res = await gapi.client.classroom.userProfiles.get({ userId: id }); userMap[id] = res.result; }
-                catch (e) { userMap[id] = { name: { fullName: 'User' }, photoUrl: null }; }
+                try {
+                    const res = await fetchFromProxy(`userProfiles/${id}`);
+                    userMap[id] = res;
+                } catch (e) {
+                    userMap[id] = { name: { fullName: 'User' }, photoUrl: null };
+                }
             }));
             return userMap;
         }
@@ -497,7 +518,6 @@
                 let badgeHtml = '';
                 if (post.type === '課題') {
                     const isSubmitted = post.submissionStatus === 'SUBMITTED';
-                    // 提出状態によってテキストとクラス（色）を切り替える
                     const badgeText = isSubmitted ? '提出済' : '未提出';
                     const badgeClass = isSubmitted ? 'badge-homework-submitted' : 'badge-homework-not-submitted';
                     badgeHtml = `<span class="type-badge ${badgeClass}">${badgeText}</span>`;
