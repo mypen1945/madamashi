@@ -4,8 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Madamashi</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Madamashi">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="apple-touch-icon" href="icon.png">
+
     <style>
-        /* --- スタイル定義（変更なし） --- */
         :root {
             --bg-color: #ffffff;
             --border-color: #eff3f4;
@@ -68,6 +75,28 @@
             background-color: var(--bg-color);
             border-color: var(--accent-color);
             box-shadow: 0 0 0 1px var(--accent-color);
+        }
+
+        /* ログアウトとフィルタボタンの行 */
+        .header-bottom-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 4px;
+        }
+
+        .logout-btn {
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            opacity: 0.6;
+            transition: 0.2s;
+            user-select: none;
+        }
+
+        .logout-btn:hover {
+            opacity: 1;
+            text-decoration: underline;
         }
 
         .filter-row {
@@ -158,74 +187,17 @@
             background-color: var(--hover-bg);
         }
 
-        .avatar-container {
-            flex-shrink: 0;
-        }
-
-        .avatar-img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            background-color: #ddd;
-            border: 1px solid rgba(0,0,0,0.04);
-        }
-
-        .avatar-fallback {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background-color: #8899a6;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .user-info {
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .user-header-row {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 15px;
-        }
-
-        .user-name {
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        .user-screenname {
-            display: block;
-            color: var(--text-secondary);
-            font-weight: 400;
-            font-size: 14px;
-            text-decoration: none;
-            white-space: normal;
-            word-break: break-all;
-            margin-top: 2px;
-        }
-
-        .user-screenname:hover {
-            text-decoration: underline;
-            color: var(--accent-color);
-        }
-
-        .tweet-time {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
+        .avatar-container { flex-shrink: 0; }
+        .avatar-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background-color: #ddd; border: 1px solid rgba(0,0,0,0.04); }
+        .avatar-fallback { width: 32px; height: 32px; border-radius: 50%; background-color: #8899a6; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
+        
+        .content { flex: 1; min-width: 0; }
+        .user-info { display: block; margin-bottom: 4px; }
+        .user-header-row { display: flex; align-items: center; gap: 4px; font-size: 15px; }
+        .user-name { font-weight: 700; color: var(--text-main); }
+        .user-screenname { display: block; color: var(--text-secondary); font-weight: 400; font-size: 14px; text-decoration: none; white-space: normal; word-break: break-all; margin-top: 2px; }
+        .user-screenname:hover { text-decoration: underline; color: var(--accent-color); }
+        .tweet-time { color: var(--text-secondary); font-size: 14px; }
 
         .type-badge {
             font-size: 11px;
@@ -255,70 +227,17 @@
             color: var(--text-main);
         }
 
-        .more-link {
-            color: var(--accent-color);
-            text-decoration: none;
-            cursor: pointer;
-            font-weight: 500;
-        }
-
-        .media-container {
-            margin-top: 12px;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-            background-color: #f8f9fa;
-            max-width: 300px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .tweet-media-img {
-            width: 100%;
-            height: auto;
-            cursor: pointer;
-            display: block;
-            object-fit: contain;
-        }
-
-        .attachments-list {
-            margin-top: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .attachment-link {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            text-decoration: none;
-            color: var(--text-main);
-            transition: background-color 0.2s;
-            font-size: 14px;
-        }
-
-        .attachment-link:hover {
-            background-color: #e9ecef;
-        }
-
+        .more-link { color: var(--accent-color); text-decoration: none; cursor: pointer; font-weight: 500; }
+        .media-container { margin-top: 12px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); background-color: #f8f9fa; max-width: 300px; display: flex; justify-content: center; }
+        .tweet-media-img { width: 100%; height: auto; cursor: pointer; display: block; object-fit: contain; }
+        
+        .attachments-list { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .attachment-link { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 12px; text-decoration: none; color: var(--text-main); transition: background-color 0.2s; font-size: 14px; }
+        .attachment-link:hover { background-color: #e9ecef; }
         .attachment-icon { font-size: 20px; }
-        .attachment-title {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            font-weight: 500;
-        }
+        .attachment-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
 
-        .due-container {
-            margin-top: 8px;
-            font-size: 13px;
-            font-weight: 500;
-        }
-
+        .due-container { margin-top: 8px; font-size: 13px; font-weight: 500; }
         .due-text-normal { color: var(--text-secondary); }
         .due-text-warning { color: var(--homework-red); font-weight: bold; }
         .due-submitted { color: #1e8e3e; font-weight: bold; }
@@ -330,8 +249,11 @@
         <div class="header">
             <div id="search_box" class="search-container" style="display: none;">
                 <input type="text" id="keyword_input" class="search-input" placeholder="投稿を検索" oninput="handleSearch()">
-                <div class="filter-row">
-                    <button id="homework_filter_btn" class="filter-btn" onclick="toggleHomeworkFilter()">課題のみ表示</button>
+                <div class="header-bottom-row">
+                    <span class="logout-btn" onclick="handleLogout()">ログアウト</span>
+                    <div class="filter-row">
+                        <button id="homework_filter_btn" class="filter-btn" onclick="toggleHomeworkFilter()">課題のみ表示</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -346,7 +268,7 @@
 
     <script>
         // --- 設定 ---
-        const CLIENT_ID = '509904198894-j2cmhttdj3ks7nvdnupasjliov7aj8a7.apps.googleusercontent.com'; 
+        const CLIENT_ID = '509904198894-j2cmhttdj3ks7nvdnupasjliov7aj8a7.apps.googleusercontent.com'; // あなたのクライアントIDを入れてください
         const SCOPES = [
             'https://www.googleapis.com/auth/classroom.courses.readonly',
             'https://www.googleapis.com/auth/classroom.announcements.readonly',
@@ -358,18 +280,24 @@
         ].join(' ');
 
         let tokenClient;
-        let accessToken = null;
+        let accessToken = localStorage.getItem('google_access_token');
         let allPosts = [];
         let globalUserMap = {};
         let isHomeworkOnly = false;
         let gisInited = false;
+        let countdownInterval = null;
 
-        // Vercel上のサーバーレス関数へリクエストを送る共通関数
+        // Vercel上のプロキシ経由でAPIを実行
         async function fetchFromProxy(endpoint, params = {}) {
             const searchParams = new URLSearchParams({ endpoint, ...params });
             const response = await fetch(`/api/classroom?${searchParams.toString()}`, {
                 headers: { 'Authorization': `Bearer ${accessToken}` }
             });
+            
+            if (response.status === 401) {
+                handleLogout();
+                throw new Error('Token expired');
+            }
             if (!response.ok) throw new Error('API request failed');
             return await response.json();
         }
@@ -381,19 +309,37 @@
                 callback: '',
             });
             gisInited = true;
+            
+            if (accessToken) {
+                // GIS初期化後に安全に実行するため少し待機
+                setTimeout(startApp, 100);
+            }
         }
 
         function handleAuthClick() {
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) throw (resp);
-                accessToken = resp.access_token; // アクセストークンを取得
-                document.getElementById('auth_view').style.display = 'none';
-                document.getElementById('timeline').style.display = 'block';
-                document.getElementById('search_box').style.display = 'flex';
-                await loadTimeline();
-                setInterval(updateCountdowns, 1000);
+                accessToken = resp.access_token;
+                localStorage.setItem('google_access_token', accessToken);
+                startApp();
             };
             tokenClient.requestAccessToken({ prompt: '' });
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('google_access_token');
+            location.reload();
+        }
+
+        async function startApp() {
+            document.getElementById('auth_view').style.display = 'none';
+            document.getElementById('timeline').style.display = 'block';
+            document.getElementById('search_box').style.display = 'flex';
+            await loadTimeline();
+            
+            if (!countdownInterval) {
+                countdownInterval = setInterval(updateCountdowns, 1000);
+            }
         }
 
         function toggleHomeworkFilter() {
@@ -422,23 +368,13 @@
 
         async function loadTimeline() {
             const timelineDiv = document.getElementById('timeline');
-            // 読み込み中の表示
             timelineDiv.innerHTML = `<div class="loading"><div class="spinner"></div>投稿を取得中...</div>`;
-            
             try {
-                // 1. コース一覧を取得
                 const coursesData = await fetchFromProxy('courses', { courseStates: 'ACTIVE', pageSize: 30 });
                 const courses = coursesData.courses || [];
-                
-                // コースが一つもない場合
-                if (courses.length === 0) {
-                    timelineDiv.innerHTML = `<div class="loading">参加しているクラスが見つかりませんでした。</div>`;
-                    return;
-                }
 
                 const promises = courses.map(async (course) => {
                     try {
-                        // お知らせと課題を取得
                         const [aRes, wRes] = await Promise.all([
                             fetchFromProxy(`courses/${course.id}/announcements`, { pageSize: 20 }),
                             fetchFromProxy(`courses/${course.id}/courseWork`, { pageSize: 20 })
@@ -454,10 +390,8 @@
                                 const subRes = await fetchFromProxy(`courses/${course.id}/courseWork/${p.id}/studentSubmissions`, { userId: 'me' });
                                 const submission = subRes.studentSubmissions?.[0];
                                 status = (submission?.state === 'TURNED_IN' || submission?.state === 'RETURNED') ? 'SUBMITTED' : 'NOT_SUBMITTED';
-                            } catch (e) { 
-                                console.warn("提出状況の取得に失敗:", e);
-                            }
-                            
+                            } catch (e) { }
+
                             let dueDate = null;
                             if (p.dueDate) {
                                 dueDate = new Date(p.dueDate.year, p.dueDate.month - 1, p.dueDate.day);
@@ -468,47 +402,32 @@
                         });
                         const wrk = await Promise.all(wrkPromises);
                         return ann.concat(wrk);
-                    } catch (e) { 
-                        console.error(`${course.name} のデータ取得に失敗:`, e);
-                        return []; 
-                    }
+                    } catch (e) { return []; }
                 });
 
                 const results = await Promise.all(promises);
                 allPosts = results.flat();
-
-                // 2. 投稿が0件だった場合の処理（ここが重要！）
-                if (allPosts.length === 0) {
-                    timelineDiv.innerHTML = `<div class="loading">表示できる投稿はありません。</div>`;
-                    return;
-                }
-
-                // 日付順に並び替え
                 allPosts.sort((a, b) => new Date(b.creationTime) - new Date(a.creationTime));
-                
+
                 const userIds = [...new Set(allPosts.map(p => p.creatorUserId))];
                 globalUserMap = await fetchUserProfiles(userIds);
-                
-                // 画面に表示
                 renderPosts(allPosts, globalUserMap);
-
             } catch (err) {
-                console.error("全体エラー:", err);
-                timelineDiv.innerHTML = `<div class="loading" style="color:red">
-                    データの取得中にエラーが発生しました。<br>
-                    Google Cloudの権限設定（URLの許可）を確認してください。
-                </div>`;
+                console.error(err);
+                if (err.message !== 'Token expired') {
+                    timelineDiv.innerHTML = `<div class="loading" style="color:red">読み込みエラーが発生しました。再読み込みしてください。</div>`;
+                }
             }
         }
 
         async function fetchUserProfiles(userIds) {
             const userMap = {};
             await Promise.all(userIds.map(async (id) => {
-                try { 
+                try {
                     const res = await fetchFromProxy(`userProfiles/${id}`);
-                    userMap[id] = res; 
-                } catch (e) { 
-                    userMap[id] = { name: { fullName: 'User' }, photoUrl: null }; 
+                    userMap[id] = res;
+                } catch (e) {
+                    userMap[id] = { name: { fullName: 'User' }, photoUrl: null };
                 }
             }));
             return userMap;
@@ -524,6 +443,7 @@
                 const avatarHtml = photoUrl ? `<img src="${photoUrl}" class="avatar-img">` : `<div class="avatar-fallback">${authorName[0]}</div>`;
                 const textHtml = formatTweetText(post, i);
                 const attachmentsHtml = renderAttachments(post.materials);
+                
                 let badgeHtml = '';
                 if (post.type === '課題') {
                     const isSubmitted = post.submissionStatus === 'SUBMITTED';
@@ -531,12 +451,14 @@
                     const badgeClass = isSubmitted ? 'badge-homework-submitted' : 'badge-homework-not-submitted';
                     badgeHtml = `<span class="type-badge ${badgeClass}">${badgeText}</span>`;
                 }
+                
                 let dueHtml = '';
                 if (post.type === '課題' && post.dueDate) {
                     dueHtml = `<div class="due-container" id="due-${i}" data-post-index="${allPosts.indexOf(post)}"></div>`;
                 } else if (post.type === '課題' && !post.dueDate) {
                     dueHtml = `<div class="due-container due-text-normal">期限なし</div>`;
                 }
+
                 const html = `
                     <div class="tweet" onclick="window.open('${post.alternateLink}?authuser=0', '_blank')">
                         <div class="avatar-container">${avatarHtml}</div>
